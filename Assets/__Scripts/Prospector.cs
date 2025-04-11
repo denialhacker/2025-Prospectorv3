@@ -10,11 +10,11 @@ public class Prospector : MonoBehaviour
     private static Prospector S; // A private Singleton for Prospector
 
     [Header("Dynamic")]
-    public List<CardProspector> drawPile;
+    public List<CardGolf> drawPile;
 
-    public List<CardProspector> discardPile;
-    public List<CardProspector> mine;
-    public CardProspector target;
+    public List<CardGolf> discardPile;
+    public List<CardGolf> mine;
+    public CardGolf target;
 
     private Transform layoutAnchor;
 
@@ -22,7 +22,7 @@ public class Prospector : MonoBehaviour
     private JsonLayout jsonLayout;
 
     // A Dictionary to pair mine layout IDs and actual Cards
-    private Dictionary<int, CardProspector> mineIdToCardDict;                 // a
+    private Dictionary<int, CardGolf> mineIdToCardDict;                 // a
 
 
     void Start()
@@ -38,7 +38,7 @@ public class Prospector : MonoBehaviour
         deck.InitDeck();
         Deck.Shuffle(ref deck.cards);
 
-        drawPile = ConvertCardsToCardProspectors(deck.cards);
+        drawPile = ConvertCardsToCardGolfs(deck.cards);
 
         LayoutMine();
 
@@ -47,18 +47,18 @@ public class Prospector : MonoBehaviour
     }
 
     /// <summary>
-    /// Converts each Card in a List(Card) into a List(CardProspector) so that it
+    /// Converts each Card in a List(Card) into a List(CardGolf) so that it
     ///  can be used in the Prospector game.
     /// </summary>
     /// <param name="listCard">A List(Card) to be converted</param>
-    /// <returns>A List(CardProspector) of the converted cards</returns>
-    List<CardProspector> ConvertCardsToCardProspectors(List<Card> listCard)
+    /// <returns>A List(CardGolf) of the converted cards</returns>
+    List<CardGolf> ConvertCardsToCardGolfs(List<Card> listCard)
     {
-        List<CardProspector> listCP = new List<CardProspector>();
-        CardProspector cp;
+        List<CardGolf> listCP = new List<CardGolf>();
+        CardGolf cp;
         foreach (Card card in listCard)
         {
-            cp = card as CardProspector;                                      // c
+            cp = card as CardGolf;                                      // c
             listCP.Add(cp);
         }
         return (listCP);
@@ -69,9 +69,9 @@ public class Prospector : MonoBehaviour
     /// Note: There is no protection against trying to draw from an empty pile!
     /// </summary>
     /// <returns>The top card of drawPile</returns>
-    CardProspector Draw()
+    CardGolf Draw()
     {
-        CardProspector cp = drawPile[0]; // Pull the 0th CardProspector
+        CardGolf cp = drawPile[0]; // Pull the 0th CardGolf
         drawPile.RemoveAt(0);            // Then remove it from drawPile
         return (cp);                      // And return it
     }
@@ -89,10 +89,10 @@ public class Prospector : MonoBehaviour
             layoutAnchor = tGO.transform;             // Grab its Transform
         }
 
-        CardProspector cp;
+        CardGolf cp;
 
-        // Generate the Dictionary to match mine layout ID to CardProspector
-        mineIdToCardDict = new Dictionary<int, CardProspector>();             // b
+        // Generate the Dictionary to match mine layout ID to CardGolf
+        mineIdToCardDict = new Dictionary<int, CardGolf>();             // b
 
 
         // Iterate through the JsonLayoutSlots pulled from the JSON_Layout
@@ -100,7 +100,7 @@ public class Prospector : MonoBehaviour
         {
             cp = Draw(); // Pull a card from the top (beginning) of the draw Pile
             cp.faceUp = slot.faceUp;    // Set its faceUp to the value in SlotDef
-                                        // Make the CardProspector a child of layoutAnchor
+                                        // Make the CardGolf a child of layoutAnchor
             cp.transform.SetParent(layoutAnchor);
 
             // Convert the last char of the layer string to an int (e.g. "Row 0")
@@ -114,15 +114,15 @@ public class Prospector : MonoBehaviour
 
             cp.layoutID = slot.id;
             cp.layoutSlot = slot;
-            // CardProspectors in the mine have the state CardState.mine
+            // CardGolfs in the mine have the state CardState.mine
             cp.state = eCardState.mine;
 
             // Set the sorting layer of all SpriteRenderers on the Card
             cp.SetSpriteSortingLayer(slot.layer);
 
-            mine.Add(cp); // Add this CardProspector to the List<mine>
+            mine.Add(cp); // Add this CardGolf to the List<mine>
 
-            // Add this CardProspector to the mineIDtoCardDict Dictionary
+            // Add this CardGolf to the mineIDtoCardDict Dictionary
             mineIdToCardDict.Add(slot.id, cp);                                // c
 
         }
@@ -131,8 +131,8 @@ public class Prospector : MonoBehaviour
     /// <summary>
     /// Moves the current target card to the discardPile
     /// </summary>
-    /// <param name="cp">The CardProspector to be moved</param>
-    void MoveToDiscard(CardProspector cp)
+    /// <param name="cp">The CardGolf to be moved</param>
+    void MoveToDiscard(CardGolf cp)
     {
         // Set the state of the card to discard
         cp.state = eCardState.discard;
@@ -155,8 +155,8 @@ public class Prospector : MonoBehaviour
     /// <summary>
     /// Make cp the new target card
     /// </summary>
-    /// <param name="cp">The CardProspector to be moved</param>
-    void MoveToTarget(CardProspector cp)
+    /// <param name="cp">The CardGolf to be moved</param>
+    void MoveToTarget(CardGolf cp)
     {
         // If there is currently a target card, move it to discardPile
         if (target != null) MoveToDiscard(target);
@@ -178,7 +178,7 @@ public class Prospector : MonoBehaviour
     /// </summary>
     void UpdateDrawPile()
     {
-        CardProspector cp;
+        CardGolf cp;
         // Go through all the cards of the drawPile
         for (int i = 0; i < drawPile.Count; i++)
         {
@@ -207,8 +207,8 @@ public class Prospector : MonoBehaviour
     /// </summary>
     public void SetMineFaceUps()
     {                                            // d
-        CardProspector coverCP;
-        foreach (CardProspector cp in mine)
+        CardGolf coverCP;
+        foreach (CardGolf cp in mine)
         {
             bool faceUp = true; // Assume the card will be face-up
 
@@ -242,7 +242,7 @@ public class Prospector : MonoBehaviour
         if (drawPile.Count > 0) return;
 
         // Check for remaining valid plays
-        foreach (CardProspector cp in mine)
+        foreach (CardGolf cp in mine)
         {
             // If there is a valid play, the game’s not over
             if (target.AdjacentTo(cp)) return;
@@ -279,8 +279,8 @@ public class Prospector : MonoBehaviour
     /// <summary>
     /// Handler for any time a card in the game is clicked
     /// </summary>
-    /// <param name="cp">The CardProspector that was clicked</param>
-    static public void CARD_CLICKED(CardProspector cp)
+    /// <param name="cp">The CardGolf that was clicked</param>
+    static public void CARD_CLICKED(CardGolf cp)
     {
         // The reaction is determined by the state of the clicked card
         switch (cp.state)
